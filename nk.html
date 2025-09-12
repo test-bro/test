@@ -275,7 +275,7 @@
                 <div id="captureArea" class="relative w-full flex flex-col items-center">
                     <img id="modalImage" class="w-full" crossorigin="anonymous">
 
-                    <div id="profileOverlay" class="w-full flex items-center p-0 shadow-md theme-left">
+                    <div id="profileOverlay" class="w-full flex items-center p-1 shadow-md theme-left">
                         <div id="profilePicContainer" class="relative">
                             <img id="modalProfilePic" class="w-13 h-13 rounded-full border-2 border-white shadow-md">
                             <div id="dragDropIconArea" class="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transform translate-x-1/2 -translate-y-1/2">
@@ -289,7 +289,7 @@
                         </div>
                     </div>
 
-                    <div id="watermark" style="font-size:10px;line-height:1" class="absolute bottom-2 right-0  text-white text-xs opacity-70 font-thin z-10 select-none font-quicksand">
+                    <div id="watermark" style="font-size:10px;line-height:1" class="absolute bottom-2 right-0 p-1 text-white text-xs opacity-70 font-thin z-10 select-none font-quicksand">
                         Created with <br>www.site.com
                     </div>
                 </div>
@@ -375,10 +375,10 @@
             <div id="toolsPanel" class="flex flex-row flex-wrap justify-center gap-2 p-2 rounded-xl bg-indigo-600 bg-opacity-90 shadow-lg mx-auto max-w-lg">
                 <button onclick="downloadImage()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="पोस्टर डाउनलोड करें">⬇️</button>
                 <button onclick="shareImage()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="इमेज शेयर करें">📤</button>
-                <button onclick="changeProfileIcon()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="प्रोफ़ाइल आइकॉन बदलें">🎨</button>
+                <button onclick="changeProfileIcon()" style="display:none;" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="प्रोफ़ाइल आइकॉन बदलें">🎨</button>
                 <button onclick="toggleFontList()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="फ़ॉन्ट बदलें">Aa</button>
                 <button onclick="changeProfileShape()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="प्रोफ़ाइल का आकार बदलें">🔲</button>
-                <button onclick="toggleTextEditor()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="टेक्स्ट जोड़ें">T</button>
+                <button onclick="toggleTextEditor()" style="display:none;" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="टेक्स्ट जोड़ें">T</button>
                 <button onclick="applyFilter()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="फ़िल्टर लगाएं">✨</button>
                 <button onclick="toggleSizeList()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="प्रोफ़ाइल का साइज़ बदलें">🔍</button>
                 <button onclick="toggleThemeList()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="थीम बदलें">🖼️</button>
