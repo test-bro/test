@@ -567,7 +567,6 @@
         const gallery = document.getElementById('gallery');
         const loadingSpinner = document.getElementById('loading-spinner');
         let allImages = [];
-        let loadedImagesCount = 0;
         let loadingImages = false;
         const imagesPerBatch = 20;
 
@@ -592,39 +591,37 @@
         }
 
         function loadNextBatch() {
-            if (loadingImages) {
+            if (loadingImages || allImages.length === 0) {
                 return;
             }
-
-            const imagesRemaining = allImages.length - loadedImagesCount;
-            if (imagesRemaining === 0) {
-                loadingSpinner.classList.add('hidden');
-                return;
-            }
-
+        
             loadingImages = true;
             loadingSpinner.classList.remove('hidden');
 
-            const batchSize = Math.min(imagesPerBatch, imagesRemaining);
+            const batch = allImages.splice(0, imagesPerBatch);
             let imagesLoadedInBatch = 0;
 
-            for (let i = 0; i < batchSize; i++) {
-                const src = allImages[loadedImagesCount];
+            if (batch.length === 0) {
+                loadingSpinner.classList.add('hidden');
+                loadingImages = false;
+                return;
+            }
+
+            batch.forEach(src => {
                 const img = new Image();
                 img.onload = () => {
                     img.className = "mb-3 w-full rounded-lg shadow cursor-pointer hover:opacity-80";
                     img.onclick = () => openModal(src);
                     gallery.appendChild(img);
                     imagesLoadedInBatch++;
-                    loadedImagesCount++;
-
-                    if (imagesLoadedInBatch === batchSize) {
+                    
+                    if (imagesLoadedInBatch === batch.length) {
                         loadingImages = false;
                         loadingSpinner.classList.add('hidden');
                     }
                 };
                 img.src = src;
-            }
+            });
         }
 
         window.addEventListener('scroll', () => {
