@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pinterest Style Poster Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Meow+Script&family=Roboto+Slab:wght@400;700&family=Kanit:wght@400;700&family=Montserrat:wght@400;700&family=Josefin+Sans:wght@400;700&family=Playfair+Display:wght@400;700&family=Oswald:wght@400;700&family=Lato:wght@400;700&family=Merriweather:wght@400;700&family=Noto+Sans:wght@444;400&family=Bebas+Neue&family=Anton&family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base styles for the modal content */
+        #modal .bg-white {
+            max-width: 280px;
+            width: 90%;
+            padding: 5px;
+        }
+
+        /* Custom styles for the profile image border */
+        .profile-border {
+            position: relative;
+            width: 5rem;
+            height: 5rem;
+            border-radius: 9999px;
+            border: 0px solid white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: block;
+        }
+
+        .profile-border::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border-radius: 9999px;
+            border: 2px solid #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .profile-icon {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background-color: #f7a32b;
+            color: white;
+            border-radius: 9999px;
+            padding: 4px;
+            font-size: 0.75rem;
+            transform: translate(25%, 25%);
+            border: 2px solid white;
+        }
+
+        .drag-highlight {
+            border: 2px dashed #3B82F6;
+        }
+
+        /* Hexagon shape using clip-path */
+        .hexagon {
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+
+        /* Rhombus shape using clip-path */
+        .rhombus {
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        }
+
+        /* Filters */
+        .filter-grayscale {
+            filter: grayscale(100%);
+        }
+
+        .filter-sepia {
+            filter: sepia(100%);
+        }
+
+        .filter-contrast {
+            filter: contrast(200%);
+        }
+
+        /* Draggable Text */
+        .draggable-text {
+            cursor: grab;
+            position: absolute;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            padding: 5px;
+            white-space: pre-wrap;
+        }
+
+        /* Font Classes */
+        .font-poppins {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .font-meow-script {
+            font-family: 'Meow Script', cursive;
+        }
+
+        .font-roboto-slab {
+            font-family: 'Roboto Slab', serif;
+        }
+
+        .font-kanit {
+            font-family: 'Kanit', sans-serif;
+        }
+
+        .font-montserrat {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .font-josefin-sans {
+            font-family: 'Josefin Sans', sans-serif;
+        }
+
+        .font-playfair-display {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .font-oswald {
+            font-family: 'Oswald', sans-serif;
+        }
+
+        .font-lato {
+            font-family: 'Lato', sans-serif;
+        }
+
+        .font-merriweather {
+            font-family: 'Merriweather', serif;
+        }
+
+        .font-noto-sans {
+            font-family: 'Noto Sans', sans-serif;
+        }
+
+        .font-open-sans {
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .font-bebas-neue {
+            font-family: 'Bebas Neue', sans-serif;
+        }
+
+        .font-anton {
+            font-family: 'Anton', sans-serif;
+        }
+
+        .font-pacifico {
+            font-family: 'Pacifico', cursive;
+        }
+
+        .font-quicksand {
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        /* Theme Classes */
+        .theme-left {
+            justify-content: flex-start;
+            text-align: left;
+        }
+
+        .theme-left .profile-text {
+            margin-left: 0.5rem;
+            margin-right: 0;
+        }
+
+        .theme-right {
+            justify-content: flex-end;
+            text-align: right;
+        }
+
+        .theme-right .profile-text {
+            order: -1;
+            margin-left: 0;
+            margin-right: 0.5rem;
+        }
+
+        .theme-center {
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .theme-center .profile-text {
+            margin-left: 0;
+            margin-right: 0;
+            margin-top: 0.5rem;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #fff;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Added for responsive image placeholders */
+        .image-container {
+            position: relative;
+            width: 100%;
+            /* 125% for a 4:5 aspect ratio, common on Pinterest */
+            padding-bottom: 125%;
+            background-color: #e0e0e0;
+            /* Placeholder background */
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .image-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 font-sans">
+    <div id="userDetailsModal" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl shadow-xl p-6 sm:p-8 max-w-sm w-full mx-4">
+            <h2 class="text-2xl font-bold mb-4 text-center text-gray-800">Welcome!</h2>
+            <p class="text-center text-gray-600 mb-6">Please enter your details to get started.</p>
+            <div class="flex flex-col items-center mb-4">
+                <img id="previewProfilePic" class="w-24 h-24 rounded-full mb-3 object-cover border-2 border-gray-300" src="https://placehold.co/100x100/90EE90/FFFFFF?text=RS" alt="Profile Preview">
+                <input type="file" id="profilePicInput" accept="image/*" class="hidden">
+                <button onclick="document.getElementById('profilePicInput').click()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm font-semibold hover:bg-gray-300 transition">Upload Photo</button>
+            </div>
+            <div class="mb-4">
+                <label for="userNameInput" class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+                <input type="text" id="userNameInput" class="w-full px-4 py-2 rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your name">
+            </div>
+            <button onclick="saveUserDetails()" class="w-full bg-blue-500 text-white px-4 py-2 rounded-full font-bold hover:bg-blue-600 transition">Save & Continue</button>
+        </div>
+    </div>
+    <div id="editProfilePopup" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl shadow-xl p-6 sm:p-8 max-w-sm w-full mx-4">
+            <h2 class="text-2xl font-bold mb-4 text-center text-gray-800">Edit Profile</h2>
+            <div class="flex flex-col items-center mb-4">
+                <img id="editPreviewPic" class="w-24 h-24 rounded-full mb-3 object-cover border-2 border-gray-300" src="" alt="Profile Preview">
+                <input type="file" id="editProfilePicInput" accept="image/*" class="hidden">
+                <button onclick="document.getElementById('editProfilePicInput').click()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm font-semibold hover:bg-gray-300 transition">Change Photo</button>
+            </div>
+            <div class="mb-4">
+                <label for="editNameInput" class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+                <input type="text" id="editNameInput" class="w-full px-4 py-2 rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your name">
+            </div>
+            <div class="mb-4">
+                <label for="editProfessionInput" class="block text-sm font-medium text-gray-700 mb-1">Profession</label>
+                <input type="text" id="editProfessionInput" class="w-full px-4 py-2 rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your profession">
+            </div>
+            <div class="mb-4">
+                <label for="editContactInput" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                <input type="text" id="editContactInput" class="w-full px-4 py-2 rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your phone number">
+            </div>
+            <button onclick="saveProfileChanges()" class="w-full bg-blue-500 text-white px-4 py-2 rounded-full font-bold hover:bg-blue-600 transition">Save Changes</button>
+            <button onclick="toggleEditProfilePopup()" class="w-full mt-2 bg-gray-300 text-gray-700 px-4 py-2 rounded-full font-bold hover:bg-gray-400 transition">Cancel</button>
+        </div>
+    </div>
+    <nav id="mainNav" class="bg-white shadow-lg p-3 flex justify-between items-center hidden">
+        <div class="flex items-center space-x-2">
+            <i class="fab fa-pinterest text-red-500 text-2xl"></i>
+            <span class="text-gray-800 text-xl font-bold">Pinterest</span>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="hidden sm:flex space-x-4">
+                <button class="text-gray-600 hover:text-gray-800 font-semibold">Home</button>
+                <button class="text-gray-600 hover:text-gray-800 font-semibold">Discover</button>
+                <button class="text-gray-600 hover:text-gray-800 font-semibold">Categories</button>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span id="navUserName" class="text-gray-800 font-semibold hidden sm:block"></span>
+                <img id="navUserPic" class="w-10 h-10 rounded-full object-cover border-2 border-gray-300 cursor-pointer" onclick="toggleEditProfilePopup()" src="" alt="Profile Picture">
+            </div>
+        </div>
+    </nav>
+    <main id="mainContent" class="hidden">
+        <div class="columns-2 md:columns-3 lg:columns-4 gap-3 p-4" id="gallery">
+            <div class="col-span-full text-center text-gray-500 font-bold text-lg p-10 border-4 border-dashed border-gray-300 rounded-lg">
+                Drag and Drop Images Here
+            </div>
+        </div>
+        <div id="modal" class="fixed inset-0 bg-black bg-opacity-70 hidden z-40 flex items-center justify-center">
+            <div class="bg-white rounded-xl shadow-xl relative p-4 flex flex-col items-center max-w-xs sm:max-w-sm">
+                <button onclick="closeModal()" class="absolute top-2 left-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold text-lg rounded-full w-10 h-10 flex items-center justify-center shadow-md z-50">✕</button>
+                <div id="dateOverlay" class="w-auto bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex justify-center items-center py-1 px-3 mb-2 shadow-md">
+                    <p id="currentDay" class="text-xs font-semibold text-white uppercase"></p>
+                    <span class="text-white text-xs mx-1">-</span>
+                    <p id="currentDate" class="text-xs text-white"></p>
+                </div>
+                <div id="captureArea" class="relative w-full flex flex-col items-center">
+                    <img id="modalImage" class="w-full" crossorigin="anonymous">
+                    <div id="profileOverlay" class="w-full flex items-center p-1 shadow-md theme-left">
+                        <div id="profilePicContainer" class="relative">
+                            <img id="modalProfilePic" class="w-13 h-13 rounded-full border-2 border-white shadow-md">
+                            <div id="dragDropIconArea" class="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transform translate-x-1/2 -translate-y-1/2">
+                                <i id="profileIcon" class="fas fa-seedling text-white"></i>
+                            </div>
+                        </div>
+                        <div class="profile-text ml-1 text-white">
+                            <p id="modalProfileName" class="font-semibold text-xl mt-" onclick="editProfileText('modalProfileName')" style="cursor: pointer;">नजट</p>
+                            <p id="modalProfileExtra" class="text-sm opacity-90 " onclick="editProfileText('modalProfileExtra')" style="cursor: pointer;">Web Developer</p>
+                            <p id="modalProfileContact" class="text-xs opacity-90 mb-2 " onclick="editProfileText('modalProfileContact')" style="cursor: pointer;">9876543210</p>
+                        </div>
+                    </div>
+                    <div id="watermark" style="font-size:9px;line-height:1" class="absolute bottom-2 right-0 p-1 text-white text-xs opacity-70 font-thin z-10 select-none font-quicksand">
+                        Created with <br><span id="watermarkText"></span>
+                    </div>
+                </div>
+                <div id="textEditPanel" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-800 p-4 rounded-lg shadow-xl z-50 flex-col space-y-2 hidden">
+                    <input type="text" id="textEditInput" class="w-full p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="saveProfileText()" class="w-full bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-md transition">Save</button>
+                </div>
+                <div id="textEditorPanel" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-800 p-4 rounded-lg shadow-xl z-50 flex-col space-y-2 hidden">
+                    <textarea id="posterTextarea" placeholder="अपना टेक्स्ट टाइप करें..." rows="3" class="w-full p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    <button onclick="addPosterText()" class="w-full bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-md transition">Add Text</button>
+                </div>
+                <div id="fontListPanel" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-800 p-4 rounded-lg shadow-xl z-50 flex flex-col space-y-2 hidden">
+                    <h3 class="text-white text-lg font-bold">Choose a Font</h3>
+                    <div class="overflow-y-auto max-h-48">
+                        <button onclick="selectFont('font-poppins')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition font-poppins">Poppins</button>
+                        <button onclick="selectFont('font-meow-script')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition font-meow-script">Meow Script</button>
+                        <button onclick="selectFont('font-roboto-slab')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition font-roboto-slab">Roboto Slab</button>
+                        <button onclick="selectFont('font-kanit')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition font-kanit">Kanit</button>
+                        <button onclick="selectFont('font-montserrat')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition font-montserrat">Montserrat</button>
+                        <button onclick="selectFont('font-josefin-sans')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition font-josefin-sans">Josefin Sans</button>
+                        <button onclick="selectFont('font-playfair-display')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition font-playfair-display">Playfair Display</button>
+                        <button onclick="selectFont('font-oswald')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition font-oswald">Oswald</button>
+                        <button onclick="selectFont('font-lato')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition font-lato">Lato</button>
+                        <button onclick="selectFont('font-merriweather')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition font-merriweather">Merriweather</button>
+                        <button onclick="selectFont('font-noto-sans')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition font-noto-sans">Noto Sans</button>
+                        <button onclick="selectFont('font-open-sans')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition font-open-sans">Open Sans</button>
+                        <button onclick="selectFont('font-bebas-neue')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition font-bebas-neue">Bebas Neue</button>
+                        <button onclick="selectFont('font-anton')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition font-anton">Anton</button>
+                        <button onclick="selectFont('font-pacifico')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition font-pacifico">Pacifico</button>
+                    </div>
+                </div>
+                <div id="sizeListPanel" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-800 p-4 rounded-lg shadow-xl z-50 flex flex-col space-y-2 hidden">
+                    <h3 class="text-white text-lg font-bold">Choose Size</h3>
+                    <button onclick="selectSize('size-small')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition">Small</button>
+                    <button onclick="selectSize('size-medium')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition">Medium</button>
+                    <button onclick="selectSize('size-large')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition">Large</button>
+                </div>
+                <div id="changePhotoPopup" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-800 p-4 rounded-lg shadow-xl z-50 flex flex-col space-y-4 hidden">
+                    <h3 class="text-white text-lg font-bold text-center">Change Poster Photo</h3>
+                    <input type="file" id="newPosterInput" accept="image/*" class="hidden">
+                    <button onclick="document.getElementById('newPosterInput').click()" class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-md transition">Upload New Photo</button>
+                    <button onclick="toggleChangePhotoPopup()" class="bg-gray-500 hover:bg-gray-600 text-white p-2 rounded-md transition">Cancel</button>
+                </div>
+                <div id="themeListPanel" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-800 p-4 rounded-lg shadow-xl z-50 flex flex-col space-y-2 hidden">
+                    <h3 class="text-white text-lg font-bold">Choose a Theme</h3>
+                    <button onclick="selectTheme('left')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition">Left Aligned</button>
+                    <button onclick="selectTheme('right')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition">Right Aligned</button>
+                    <button onclick="selectTheme('center')" class="w-full text-left p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition">Centered</button>
+                </div>
+            </div>
+        </div>
+        <div id="downloadPopup" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center hidden">
+            <div class="bg-white rounded-xl shadow-xl p-6 sm:p-8 max-w-sm w-full mx-4 text-center">
+                <img id="adBanner" src="/test/img/ad-banner.webp" alt="Ad Banner" class="w-full rounded-lg mb-4">
+                <div id="loadingState" class="flex flex-col items-center">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">Downloading...</h2>
+                    <div class="spinner"></div>
+                </div>
+                <div id="downloadComplete" class="hidden flex-col items-center">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">Download Complete!</h2>
+                    <button id="okButton" onclick="closeDownloadPopup()" class="w-full bg-blue-500 text-white px-4 py-2 rounded-full font-bold hover:bg-blue-600 transition">OK</button>
+                </div>
+            </div>
+        </div>
+        <div id="cropPopup" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center hidden">
+            <div class="bg-white rounded-xl shadow-xl p-6 sm:p-8 max-w-sm w-full mx-4">
+                <h2 class="text-2xl font-bold mb-4 text-center text-gray-800">Crop Your Photo</h2>
+                <div class="w-full h-64 overflow-hidden relative mb-4 border-2 border-gray-300">
+                    <img id="cropImage" class="absolute cursor-move" alt="Image to crop">
+                </div>
+                <div class="flex items-center justify-center space-x-4 mb-4">
+                    <button id="zoomOutBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-2 px-4 rounded-full transition">-</button>
+                    <input type="range" id="zoomSlider" min="1" max="3" step="0.1" value="1" class="w-full">
+                    <button id="zoomInBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-2 px-4 rounded-full transition">+</button>
+                </div>
+                <button onclick="saveCroppedImage()" class="w-full bg-blue-500 text-white px-4 py-2 rounded-full font-bold hover:bg-blue-600 transition">Save</button>
+                <button onclick="toggleCropPopup(false)" class="w-full mt-2 bg-gray-300 text-gray-700 px-4 py-2 rounded-full font-bold hover:bg-gray-400 transition">Cancel</button>
+            </div>
+        </div>
+        <div id="floatingButtonsContainer" class="fixed bottom-0 left-0 right-0 z-50 p-2 sm:p-4 hidden">
+            <div id="toolsPanel" class="flex flex-row flex-wrap justify-center gap-2 p-2 rounded-xl bg-indigo-600 bg-opacity-90 shadow-lg mx-auto max-w-lg">
+                <button onclick="downloadSD()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="SD Poster Download">⬇️ SD</button>
+                <button onclick="downloadHD()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="HD Poster Download">⬇️ HD</button>
+                <button onclick="changeProfileIcon()" style="display:none;" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="प्रोफ़ाइल आइकॉन बदलें">🎨</button>
+                <button onclick="toggleFontList()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="फ़ॉन्ट बदलें">Aa</button>
+                <button onclick="changeProfileShape()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="प्रोफ़ाइल का आकार बदलें">🔲</button>
+                <button onclick="toggleTextEditor()" style="display:none;" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="टेक्स्ट जोड़ें">T</button>
+                <button onclick="applyFilter()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="फ़िल्टर लगाएं">✨</button>
+                <button onclick="toggleSizeList()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="प्रोफ़ाइल का साइज़ बदलें">🔍</button>
+                <button onclick="toggleThemeList()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="थीम बदलें">🖼️</button>
+                <button onclick="changeProfileBackground()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-md transition" title="बैकग्राउंड बदलें">🌄</button>
+            </div>
+        </div>
+    </main>
+    <script>
+        // Placeholder for JSON data, assuming it would be at this path
+        const imagesListUrl = '/test/images.json';
+        // Initial user data
+        let user = {
+            name: "नजट",
+            extra: "Web Developer",
+            contact: "9876543210",
+            pic: "https://placehold.co/100x100/90EE90/FFFFFF?text=RS"
+        };
+        let allImages = []; // Array to store all images from the JSON file
+        let page = 1; // Current page number for infinite scroll
+        const limit = 20; // Number of images to load per page
+        let isLoading = false; // Flag to prevent multiple image requests
+
+        let currentIconIndex = 0;
+        const icons = ['fa-seedling', 'fa-star', 'fa-heart', 'fa-cogs', 'fa-sun'];
+
+        let currentFontIndex = 0;
+        const fonts = [
+            'font-poppins', 'font-meow-script', 'font-roboto-slab', 'font-kanit',
+            'font-montserrat', 'font-josefin-sans', 'font-playfair-display',
+            'font-oswald', 'font-lato', 'font-merriweather', 'font-noto-sans',
+            'font-open-sans', 'font-bebas-neue', 'font-anton', 'font-pacifico'
+        ];
+
+        const profileShapes = ['rounded-full', 'rounded-lg', 'hexagon', 'rhombus'];
+        let currentShapeIndex = 0;
+
+        const profileSizes = {
+            'size-small': {
+                img: ['w-12', 'h-12'],
+                icon: ['w-6', 'h-6']
+            },
+            'size-medium': {
+                img: ['w-16', 'h-16'],
+                icon: ['w-8', 'h-8']
+            },
+            'size-large': {
+                img: ['w-24', 'h-24'],
+                icon: ['w-10', 'h-10']
+            }
+        };
+        const sizeClasses = Object.keys(profileSizes);
+
+        let currentFilterIndex = -1;
+        const filters = ['', 'filter-grayscale', 'filter-sepia', 'filter-contrast'];
+
+        let cropImage = document.getElementById('cropImage');
+        let zoomSlider = document.getElementById('zoomSlider');
+        let cropPopup = document.getElementById('cropPopup');
+        let imgFileToCrop = null;
+
+        const themeClasses = ['theme-left', 'theme-right', 'theme-center'];
+        let currentThemeIndex = 0;
+        const profileOverlay = document.getElementById('profileOverlay');
+
+        const userDetailsModal = document.getElementById('userDetailsModal');
+        const userNameInput = document.getElementById('userNameInput');
+        const profilePicInput = document.getElementById('profilePicInput');
+        const previewProfilePic = document.getElementById('previewProfilePic');
+        const mainNav = document.getElementById('mainNav');
+        const mainContent = document.getElementById('mainContent');
+        const navUserName = document.getElementById('navUserName');
+        const navUserPic = document.getElementById('navUserPic');
+
+        const editProfilePopup = document.getElementById('editProfilePopup');
+        const editNameInput = document.getElementById('editNameInput');
+        const editProfilePicInput = document.getElementById('editProfilePicInput');
+        const editPreviewPic = document.getElementById('editPreviewPic');
+        const editProfessionInput = document.getElementById('editProfessionInput');
+        const editContactInput = document.getElementById('editContactInput');
+        const floatingButtonsContainer = document.getElementById('floatingButtonsContainer');
+        const toolsPanel = document.getElementById('toolsPanel');
+
+        let preloadedCanvasSD = null;
+        let preloadedCanvasHD = null;
+        let isPreloading = false;
+
+        const profileBackgrounds = [
+            "/test/bg/bg-1.webp",
+            "/test/bg/bg-2.webp",
+            "/test/bg/bg-3.webp"
+        ];
+        let currentBgIndex = 0;
+
+        let currentEditTextElement = null;
+        const textEditPanel = document.getElementById('textEditPanel');
+        const textEditInput = document.getElementById('textEditInput');
+
+        // --- Core Functions ---
+
+        function toggleEditProfilePopup() {
+            editProfilePopup.classList.toggle('hidden');
+            if (!editProfilePopup.classList.contains('hidden')) {
+                editNameInput.value = user.name;
+                editProfessionInput.value = user.extra;
+                editContactInput.value = user.contact;
+                editPreviewPic.src = user.pic;
+            }
+        }
+
+        function saveProfileChanges() {
+            user.name = editNameInput.value.trim();
+            user.extra = editProfessionInput.value.trim();
+            user.contact = editContactInput.value.trim();
+            user.pic = editPreviewPic.src;
+            localStorage.setItem('posterUser', JSON.stringify(user));
+            initApp();
+            toggleEditProfilePopup();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const storedUser = JSON.parse(localStorage.getItem('posterUser'));
+            if (storedUser) {
+                user = storedUser;
+                initApp();
+            } else {
+                showUserDetailsModal();
+            }
+            setWatermark();
+        });
+
+        profilePicInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    previewProfilePic.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        editProfilePicInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    editPreviewPic.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function showUserDetailsModal() {
+            userDetailsModal.classList.remove('hidden');
+        }
+
+        function saveUserDetails() {
+            const name = userNameInput.value.trim();
+            const pic = previewProfilePic.src;
+            if (name === "" || pic.startsWith('data:,')) {
+                alert("Please enter a name and upload a photo.");
+                return;
+            }
+            user = {
+                name: name,
+                extra: "Web Developer",
+                contact: "9876543210",
+                pic: pic
+            };
+            localStorage.setItem('posterUser', JSON.stringify(user));
+            initApp();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function initApp() {
+            userDetailsModal.classList.add('hidden');
+            mainNav.classList.remove('hidden');
+            mainContent.classList.remove('hidden');
+            navUserName.innerText = user.name;
+            navUserPic.src = user.pic;
+            fetchImagesAndLoadGallery(imagesListUrl);
+        }
+
+        const gallery = document.getElementById('gallery');
+
+        function fetchImagesAndLoadGallery(imagesListUrl) {
+            fetch(imagesListUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    allImages = data;
+                    shuffleArray(allImages);
+                    // Load the first batch of images initially
+                    loadMoreImages();
+                    // Add the infinite scroll event listener
+                    window.addEventListener('scroll', handleInfiniteScroll);
+                })
+                .catch(error => {
+                    console.error('There was a problem fetching the images:', error);
+                    document.getElementById('gallery').innerHTML = '<div class="col-span-full text-center text-gray-500 font-bold text-lg p-10 border-4 border-dashed border-gray-300 rounded-lg">इमेज लोड करने में समस्या हुई।</div>';
+                });
+        }
+
+        function handleInfiniteScroll() {
+            const {
+                scrollTop,
+                scrollHeight,
+                clientHeight
+            } = document.documentElement;
+            if (scrollTop + clientHeight >= scrollHeight - 500) {
+                loadMoreImages();
+            }
+        }
+
+        function loadMoreImages() {
+            if (isLoading) return;
+            isLoading = true;
+
+            const start = (page - 1) * limit;
+            const end = start + limit;
+            const newImages = allImages.slice(start, end);
+
+            if (newImages.length === 0) {
+                console.log("No more images to load.");
+                isLoading = false;
+                window.removeEventListener('scroll', handleInfiniteScroll); // Remove the listener
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+
+            newImages.forEach(src => {
+                const container = document.createElement("div");
+                container.className = "mb-3 w-full rounded-lg shadow cursor-pointer hover:opacity-80 image-container";
+                let img = document.createElement("img");
+                img.src = src;
+                img.setAttribute("loading", "lazy");
+                img.alt = "Gallery Image";
+                img.onerror = function() {
+                    console.log(`Image failed to load: ${this.src}. Displaying ad banner.`);
+                    this.src = '/test/img/ad-banner.webp';
+                    this.style.objectFit = 'contain';
+                    this.parentNode.onclick = null;
+                };
+                container.onclick = () => openModal(src);
+                container.appendChild(img);
+                fragment.appendChild(container);
+            });
+
+            gallery.appendChild(fragment);
+            page++;
+            isLoading = false;
+        }
+
+
+        gallery.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            gallery.classList.add('border-blue-500');
+        });
+
+        gallery.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            gallery.classList.remove('border-blue-500');
+        });
+
+        gallery.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            gallery.classList.remove('border-blue-500');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    if (file.type.startsWith('image/')) {
+                        const imageUrl = URL.createObjectURL(file);
+                        let img = document.createElement("img");
+                        img.src = imageUrl;
+                        img.className = "mb-3 w-full rounded-lg shadow cursor-pointer hover:opacity-80";
+                        img.onclick = () => openModal(imageUrl);
+                        gallery.appendChild(img);
+                    }
+                }
+            }
+        });
+
+        const dragDropIconArea = document.getElementById('dragDropIconArea');
+
+        dragDropIconArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dragDropIconArea.classList.add('drag-highlight');
+        });
+
+        dragDropIconArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dragDropIconArea.classList.remove('drag-highlight');
+        });
+
+        dragDropIconArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dragDropIconArea.classList.remove('drag-highlight');
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                const file = files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = document.createElement('img');
+                    img.src = event.target.result;
+                    img.className = "w-full h-full object-cover rounded-full";
+                    const profileIcon = document.getElementById("profileIcon");
+                    if (profileIcon) {
+                        profileIcon.remove();
+                    }
+                    dragDropIconArea.innerHTML = '';
+                    dragDropIconArea.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function changeProfileIcon() {
+            const profileIcon = document.getElementById("profileIcon");
+            if (dragDropIconArea.querySelector('img')) {
+                console.log("Custom image is already in place. Theme button will not change the icon.");
+                return;
+            }
+            currentIconIndex = (currentIconIndex + 1) % icons.length;
+            if (profileIcon) {
+                profileIcon.classList.remove(...icons);
+                profileIcon.classList.add(icons[currentIconIndex]);
+            }
+        }
+
+        function changeProfileShape() {
+            const profilePic = document.getElementById('modalProfilePic');
+            profilePic.classList.remove(...profileShapes);
+            currentShapeIndex = (currentShapeIndex + 1) % profileShapes.length;
+            profilePic.classList.add(profileShapes[currentShapeIndex]);
+        }
+
+        function applyFilter() {
+            const modalImage = document.getElementById('modalImage');
+            if (currentFilterIndex >= 0 && filters[currentFilterIndex] !== '') {
+                modalImage.classList.remove(filters[currentFilterIndex]);
+            }
+            currentFilterIndex = (currentFilterIndex + 1) % filters.length;
+            if (currentFilterIndex >= 0 && filters[currentFilterIndex] !== '') {
+                modalImage.classList.add(filters[currentFilterIndex]);
+            }
+        }
+
+        function toggleFontList() {
+            const fontListPanel = document.getElementById('fontListPanel');
+            fontListPanel.classList.toggle('hidden');
+        }
+
+        function selectFont(fontClass) {
+            const profileName = document.getElementById('modalProfileName');
+            const profileExtra = document.getElementById('modalProfileExtra');
+            const profileContact = document.getElementById('modalProfileContact');
+            profileName.className = profileName.className.replace(/\bfont-\S+/g, '');
+            profileExtra.className = profileExtra.className.replace(/\bfont-\S+/g, '');
+            profileContact.className = profileContact.className.replace(/\bfont-\S+/g, '');
+            profileName.classList.add(fontClass);
+            profileExtra.classList.add(fontClass);
+            profileContact.classList.add(fontClass);
+            toggleFontList();
+        }
+
+        function toggleTextEditor() {
+            const textEditorPanel = document.getElementById('textEditorPanel');
+            textEditorPanel.classList.toggle('hidden');
+            if (!textEditorPanel.classList.contains('hidden')) {
+                document.getElementById('posterTextarea').focus();
+            }
+        }
+
+        function toggleSizeList() {
+            const sizeListPanel = document.getElementById('sizeListPanel');
+            sizeListPanel.classList.toggle('hidden');
+        }
+
+        function selectSize(sizeClass) {
+            const profilePicContainer = document.getElementById('profilePicContainer');
+            const profilePic = document.getElementById('modalProfilePic');
+            const dragDropIconArea = document.getElementById('dragDropIconArea');
+            const size = profileSizes[sizeClass];
+
+            profilePicContainer.classList.remove(...profileSizes['size-small'].img, ...profileSizes['size-medium'].img, ...profileSizes['size-large'].img);
+            profilePic.classList.remove(...profileSizes['size-small'].img, ...profileSizes['size-medium'].img, ...profileSizes['size-large'].img);
+            profilePic.classList.remove('w-13', 'h-13');
+            dragDropIconArea.classList.remove(...profileSizes['size-small'].icon, ...profileSizes['size-medium'].icon, ...profileSizes['size-large'].icon);
+
+            profilePicContainer.classList.add(...size.img);
+            profilePic.classList.add(...size.img);
+            dragDropIconArea.classList.add(...size.icon);
+        }
+
+        function addPosterText() {
+            const posterTextarea = document.getElementById('posterTextarea');
+            const text = posterTextarea.value;
+            if (text.trim() === "") {
+                toggleTextEditor();
+                return;
+            }
+            const newTextElement = document.createElement('div');
+            newTextElement.innerText = text;
+            newTextElement.classList.add('draggable-text');
+            newTextElement.style.top = '10%';
+            newTextElement.style.left = '50%';
+            newTextElement.style.transform = 'translateX(-50%)';
+            const captureArea = document.getElementById('captureArea');
+            captureArea.appendChild(newTextElement);
+            let isDragging = false;
+            let startX, startY;
+            let initialX, initialY;
+
+            newTextElement.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                const style = window.getComputedStyle(newTextElement);
+                const matrix = new DOMMatrix(style.transform);
+                initialX = matrix.m41;
+                initialY = matrix.m42;
+                newTextElement.style.cursor = 'grabbing';
+                newTextElement.style.zIndex = '100';
+                e.stopPropagation();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                newTextElement.style.transform = `translate(${initialX + dx}px, ${initialY + dy}px)`;
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    newTextElement.style.cursor = 'grab';
+                    newTextElement.style.zIndex = 'auto';
+                }
+            });
+            toggleTextEditor();
+            posterTextarea.value = '';
+        }
+
+        function openModal(src) {
+            const modalImage = document.getElementById("modalImage");
+            modalImage.src = src;
+            modalImage.classList.remove(...filters.filter(f => f));
+            currentFilterIndex = -1;
+            const profileOverlay = document.getElementById("profileOverlay");
+            const initialImageUrl = profileBackgrounds[0];
+            profileOverlay.style.background = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${initialImageUrl})`;
+            profileOverlay.style.backgroundSize = 'cover';
+            profileOverlay.style.backgroundPosition = 'center';
+            profileOverlay.style.backgroundRepeat = 'no-repeat';
+            currentBgIndex = 0;
+            const now = new Date();
+            const optionsDay = {
+                weekday: 'long'
+            };
+            const optionsDate = {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+            };
+            const currentDay = now.toLocaleDateString('en-US', optionsDay);
+            const currentDate = now.toLocaleDateString('en-US', optionsDate);
+            document.getElementById("currentDay").innerText = currentDay;
+            document.getElementById("currentDate").innerText = currentDate;
+            document.getElementById("modalProfilePic").src = user.pic;
+            document.getElementById("modalProfileName").innerText = user.name;
+            document.getElementById("modalProfileExtra").innerText = user.extra;
+            document.getElementById("modalProfileContact").innerText = user.contact;
+            document.getElementById("modal").classList.remove("hidden");
+            floatingButtonsContainer.classList.remove("hidden");
+            selectSize('size-medium');
+            preloadCanvas();
+        }
+
+        function changeProfileBackground() {
+            const profileOverlay = document.getElementById("profileOverlay");
+            currentBgIndex = (currentBgIndex + 1) % profileBackgrounds.length;
+            const imageUrl = profileBackgrounds[currentBgIndex];
+            profileOverlay.style.background = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${imageUrl})`;
+            profileOverlay.style.backgroundSize = 'cover';
+            profileOverlay.style.backgroundPosition = 'center';
+            profileOverlay.style.backgroundRepeat = 'no-repeat';
+        }
+
+        function closeModal() {
+            document.getElementById("modal").classList.add("hidden");
+            floatingButtonsContainer.classList.add("hidden");
+        }
+
+        const createClippedImage = (img, shape) => {
+            return new Promise(resolve => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const size = Math.min(img.width, img.height);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.beginPath();
+                if (shape === 'rounded-full') {
+                    ctx.arc(size / 2, size / 2, size / 2, 0, 2 * Math.PI);
+                } else if (shape === 'rounded-lg') {
+                    const radius = 16;
+                    ctx.moveTo(radius, 0);
+                    ctx.lineTo(size - radius, 0);
+                    ctx.arcTo(size, 0, size, radius, radius);
+                    ctx.lineTo(size, size - radius);
+                    ctx.arcTo(size, size, size - radius, size, radius);
+                    ctx.lineTo(radius, size);
+                    ctx.arcTo(0, size, 0, size - radius, radius);
+                    ctx.lineTo(0, radius);
+                    ctx.arcTo(0, 0, radius, 0, radius);
+                } else if (shape === 'hexagon') {
+                    const h = size / 2;
+                    const w = size * Math.sqrt(3) / 2;
+                    ctx.moveTo(h, 0);
+                    ctx.lineTo(size, w / 2);
+                    ctx.lineTo(size, size - w / 2);
+                    ctx.lineTo(h, size);
+                    ctx.lineTo(0, size - w / 2);
+                    ctx.lineTo(0, w / 2);
+                    ctx.closePath();
+                } else if (shape === 'rhombus') {
+                    ctx.moveTo(size / 2, 0);
+                    ctx.lineTo(size, size / 2);
+                    ctx.lineTo(size / 2, size);
+                    ctx.lineTo(0, size / 2);
+                    ctx.closePath();
+                } else {
+                    ctx.rect(0, 0, size, size);
+                }
+                ctx.clip();
+                ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, size, size);
+                resolve(canvas.toDataURL('image/png'));
+            });
+        };
+
+        function preloadCanvas() {
+            if (isPreloading) return;
+            isPreloading = true;
+            preloadedCanvasSD = null;
+            preloadedCanvasHD = null;
+            const captureArea = document.querySelector("#captureArea");
+            html2canvas(captureArea, {
+                scale: 6,
+                imageSmoothingEnabled: true
+            }).then(canvas => {
+                preloadedCanvasHD = canvas;
+                console.log("HD Canvas preloaded successfully!");
+            }).catch(error => {
+                console.error("HD Canvas preloading failed:", error);
+            });
+            html2canvas(captureArea, {
+                scale: 2,
+                imageSmoothingEnabled: true
+            }).then(canvas => {
+                preloadedCanvasSD = canvas;
+                console.log("SD Canvas preloaded successfully!");
+            }).catch(error => {
+                console.error("SD Canvas preloading failed:", error);
+            }).finally(() => {
+                isPreloading = false;
+            });
+        }
+
+        async function downloadPoster(scale, quality) {
+            const downloadPopup = document.getElementById('downloadPopup');
+            const loadingState = document.getElementById('loadingState');
+            const downloadComplete = document.getElementById('downloadComplete');
+            downloadPopup.classList.remove('hidden');
+            loadingState.classList.remove('hidden');
+            downloadComplete.classList.add('hidden');
+            await new Promise(resolve => setTimeout(resolve, 50));
+            let canvasToDownload = null;
+            if (quality === 'HD' && preloadedCanvasHD) {
+                canvasToDownload = preloadedCanvasHD;
+            } else if (quality === 'SD' && preloadedCanvasSD) {
+                canvasToDownload = preloadedCanvasSD;
+            }
+            if (canvasToDownload) {
+                console.log(`Using preloaded ${quality} canvas.`);
+                let link = document.createElement("a");
+                link.download = `poster_${quality}.png`;
+                link.href = canvasToDownload.toDataURL('image/png');
+                link.click();
+            } else {
+                console.log(`Preloaded ${quality} canvas not ready. Generating on-demand.`);
+                const captureArea = document.querySelector("#captureArea");
+                const canvas = await html2canvas(captureArea, {
+                    scale: scale,
+                    imageSmoothingEnabled: true
+                });
+                let link = document.createElement("a");
+                link.download = `poster_${quality}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }
+            loadingState.classList.add('hidden');
+            downloadComplete.classList.remove('hidden');
+        }
+
+        function downloadSD() {
+            downloadPoster(2, 'SD');
+        }
+
+        function downloadHD() {
+            downloadPoster(6, 'HD');
+        }
+
+        function closeDownloadPopup() {
+            document.getElementById('downloadPopup').classList.add('hidden');
+        }
+
+        function editProfileText(elementId) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            currentEditTextElement = element;
+            textEditInput.value = element.innerText;
+            textEditPanel.classList.remove('hidden');
+            textEditInput.focus();
+        }
+
+        function saveProfileText() {
+            if (!currentEditTextElement) return;
+            const newText = textEditInput.value;
+            currentEditTextElement.innerText = newText;
+            textEditPanel.classList.add('hidden');
+            currentEditTextElement = null;
+        }
+
+        function toggleChangePhotoPopup() {
+            const changePhotoPopup = document.getElementById('changePhotoPopup');
+            changePhotoPopup.classList.toggle('hidden');
+        }
+
+        function toggleThemeList() {
+            const themeListPanel = document.getElementById('themeListPanel');
+            themeListPanel.classList.toggle('hidden');
+        }
+
+        function selectTheme(theme) {
+            const profileOverlay = document.getElementById('profileOverlay');
+            const watermark = document.getElementById('watermark');
+            profileOverlay.classList.remove(...themeClasses);
+            watermark.classList.remove('bottom-1', 'right-1', 'left-1', 'left-1/2', '-translate-x-1/2');
+            profileOverlay.classList.add('theme-' + theme);
+            if (theme === 'left' || theme === 'center') {
+                watermark.classList.add('bottom-1', 'right-1');
+            } else if (theme === 'right') {
+                watermark.classList.add('bottom-1', 'left-1');
+            }
+            toggleThemeList();
+        }
+
+        const newPosterInput = document.getElementById('newPosterInput');
+        newPosterInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const modalImage = document.getElementById('modalImage');
+                    modalImage.src = event.target.result;
+                    toggleChangePhotoPopup();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function setWatermark() {
+            const watermarkTextElement = document.getElementById('watermarkText');
+            if (watermarkTextElement) {
+                const url = window.location.hostname;
+                watermarkTextElement.innerText = url;
+            }
+        }
+
+        function toggleCropPopup(show) {
+            document.getElementById('cropPopup').classList.toggle('hidden', !show);
+        }
+
+        function saveCroppedImage() {
+            alert('Cropping functionality not yet implemented.');
+            toggleCropPopup(false);
+        }
+    </script>
+</body>
+
+</html>
