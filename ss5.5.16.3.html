@@ -257,6 +257,9 @@
             <p class="mt-4 text-gray-500 font-bold text-lg">Images are loading...</p>
         </div>
         <div class="columns-2 md:columns-3 lg:columns-4 gap-3 p-4 hidden" id="gallery">
+            <div class="col-span-full text-center text-gray-500 font-bold text-lg p-10 border-4 border-dashed border-gray-300 rounded-lg">
+                Drag and Drop Images Here
+            </div>
         </div>
         <div class="flex justify-center mt-4">
             <button id="loadMoreBtn" onclick="loadMoreImages()" class="w-1/2 mx-auto px-6 py-3 bg-blue-500 text-white font-bold rounded-full hover:bg-blue-600 transition duration-300 hidden">Load More</button>
@@ -446,13 +449,12 @@
         const floatingButtonsContainer = document.getElementById('floatingButtonsContainer');
         const profileOverlay = document.getElementById('profileOverlay');
         const loadingGallery = document.getElementById('loadingGallery');
-        
+
         // Load More functionality variables
         let imagesPerLoad = 20;
         let loadedImageCount = 0;
         let allImages = [];
         const loadMoreBtn = document.getElementById('loadMoreBtn');
-
         // This is a new function to compress an image
         async function compressImageForGallery(src, maxWidth, quality) {
             return new Promise((resolve, reject) => {
@@ -472,17 +474,14 @@
                     ctx.drawImage(img, 0, 0, newWidth, newHeight);
                     resolve(canvas.toDataURL('image/jpeg', quality)); // Compressed JPEG format
                 };
-                img.onerror = () => {
-                    console.error(`Failed to load or compress image: ${src}`);
-                    reject(new Error(`Failed to load or compress image: ${src}`));
-                };
+                img.onerror = reject;
                 img.src = src;
             });
         }
-        
+
         // This array will hold the original image URLs
         let originalImagesList = [];
-        
+
         function preloadImages(imageUrls) {
             return Promise.all(imageUrls.map(url => {
                 return new Promise((resolve, reject) => {
@@ -496,31 +495,31 @@
                 });
             }));
         }
-        
+
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [array[i], array[j]] = [array[j], array[i]];
             }
         }
-        
+
         async function fetchImagesAndLoadGallery(imagesListUrl) {
             loadingGallery.classList.remove('hidden');
             gallery.classList.add('hidden');
-        
+
             try {
                 const response = await fetch(imagesListUrl);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
                 const images = await response.json();
-        
+
                 shuffleArray(images);
                 allImages = images; // Store all images
                 loadedImageCount = 0; // Reset counter
-        
+
                 loadGallery(); // Load first batch
-        
+
                 loadingGallery.classList.add('hidden');
                 gallery.classList.remove('hidden');
             } catch (error) {
@@ -530,7 +529,7 @@
                 gallery.innerHTML = '<div class="col-span-full text-center text-gray-500 font-bold text-lg p-10 border-4 border-dashed border-gray-300 rounded-lg">इमेज लोड करने में समस्या हुई।</div>';
             }
         }
-        
+
         function initApp() {
             userDetailsModal.classList.add('hidden');
             mainNav.classList.remove('hidden');
@@ -539,7 +538,7 @@
             navUserPic.src = user.pic;
             fetchImagesAndLoadGallery('/test/images.json'); // Make sure this path is correct
         }
-        
+
         document.addEventListener('DOMContentLoaded', () => {
             const storedUser = JSON.parse(localStorage.getItem('posterUser'));
             if (storedUser) {
@@ -550,7 +549,7 @@
             }
             setWatermark();
         });
-        
+
         const lazyLoadObserver = new IntersectionObserver(async (entries, observer) => {
             for (const entry of entries) {
                 if (entry.isIntersecting) {
@@ -567,7 +566,7 @@
                         } catch (error) {
                             console.error(`Failed to compress or load image: ${src}`, error);
                             img.src = '/test/img/ad-banner.webp';
-                            img.style.object-fit = 'contain';
+                            img.style.objectFit = 'contain';
                             img.style.opacity = 1;
                         }
                     }
@@ -579,10 +578,10 @@
             rootMargin: '100px',
             threshold: 0.01
         });
-        
+
         function loadGallery() {
             const imagesToLoad = allImages.slice(loadedImageCount, loadedImageCount + imagesPerLoad);
-            
+
             if (imagesToLoad.length === 0) {
                 loadMoreBtn.classList.add('hidden');
                 return;
@@ -610,18 +609,27 @@
                 gallery.appendChild(container);
                 lazyLoadObserver.observe(img);
             });
-            
+
             loadedImageCount += imagesToLoad.length;
-            
+
             if (loadedImageCount >= allImages.length) {
                 loadMoreBtn.classList.add('hidden');
             } else {
                 loadMoreBtn.classList.remove('hidden');
             }
         }
-        
+
         function loadMoreImages() {
+            // Save the current vertical scroll position.
+            const currentScrollY = window.scrollY;
+
+            // Load the next batch of images.
             loadGallery();
+
+            // After a slight delay to allow the new content to render, restore the scroll position.
+            setTimeout(() => {
+                window.scrollTo(0, currentScrollY);
+            }, 0);
         }
 
         function toggleEditProfilePopup() {
@@ -638,7 +646,7 @@
                 editPreviewPic.src = user.pic;
             }
         }
-        
+
         function saveProfileChanges() {
             const editNameInput = document.getElementById('editNameInput');
             const editProfessionInput = document.getElementById('editProfessionInput');
@@ -652,11 +660,11 @@
             initApp();
             toggleEditProfilePopup();
         }
-        
+
         function showUserDetailsModal() {
             userDetailsModal.classList.remove('hidden');
         }
-        
+
         function saveUserDetails() {
             const name = userNameInput.value.trim();
             const pic = previewProfilePic.src;
@@ -673,7 +681,7 @@
             localStorage.setItem('posterUser', JSON.stringify(user));
             initApp();
         }
-        
+
         profilePicInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -684,7 +692,7 @@
                 reader.readAsDataURL(file);
             }
         });
-        
+
         const editProfilePicInput = document.getElementById('editProfilePicInput');
         editProfilePicInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -697,19 +705,19 @@
                 reader.readAsDataURL(file);
             }
         });
-        
+
         gallery.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.stopPropagation();
             gallery.classList.add('border-blue-500');
         });
-        
+
         gallery.addEventListener('dragleave', (e) => {
             e.preventDefault();
             e.stopPropagation();
             gallery.classList.remove('border-blue-500');
         });
-        
+
         gallery.addEventListener('drop', (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -729,19 +737,19 @@
                 }
             }
         });
-        
+
         dragDropIconArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.stopPropagation();
             dragDropIconArea.classList.add('drag-highlight');
         });
-        
+
         dragDropIconArea.addEventListener('dragleave', (e) => {
             e.preventDefault();
             e.stopPropagation();
             dragDropIconArea.classList.remove('drag-highlight');
         });
-        
+
         dragDropIconArea.addEventListener('drop', (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -764,7 +772,7 @@
                 reader.readAsDataURL(file);
             }
         });
-        
+
         function changeProfileIcon() {
             const profileIcon = document.getElementById("profileIcon");
             if (dragDropIconArea.querySelector('img')) {
@@ -777,14 +785,14 @@
                 profileIcon.classList.add(icons[currentIconIndex]);
             }
         }
-        
+
         function changeProfileShape() {
             const profilePic = document.getElementById('modalProfilePic');
             profilePic.classList.remove(...profileShapes);
             currentShapeIndex = (currentShapeIndex + 1) % profileShapes.length;
             profilePic.classList.add(profileShapes[currentShapeIndex]);
         }
-        
+
         function applyFilter() {
             const modalImage = document.getElementById('modalImage');
             if (currentFilterIndex >= 0 && filters[currentFilterIndex] !== '') {
@@ -795,12 +803,12 @@
                 modalImage.classList.add(filters[currentFilterIndex]);
             }
         }
-        
+
         function toggleFontList() {
             const fontListPanel = document.getElementById('fontListPanel');
             fontListPanel.classList.toggle('hidden');
         }
-        
+
         function selectFont(fontClass) {
             const profileName = document.getElementById('modalProfileName');
             const profileExtra = document.getElementById('modalProfileExtra');
@@ -813,7 +821,7 @@
             profileContact.classList.add(fontClass);
             toggleFontList();
         }
-        
+
         function toggleTextEditor() {
             const textEditorPanel = document.getElementById('textEditorPanel');
             textEditorPanel.classList.toggle('hidden');
@@ -821,12 +829,12 @@
                 document.getElementById('posterTextarea').focus();
             }
         }
-        
+
         function toggleSizeList() {
             const sizeListPanel = document.getElementById('sizeListPanel');
             sizeListPanel.classList.toggle('hidden');
         }
-        
+
         function selectSize(sizeClass) {
             const profilePicContainer = document.getElementById('profilePicContainer');
             const profilePic = document.getElementById('modalProfilePic');
@@ -840,7 +848,7 @@
             profilePic.classList.add(...size.img);
             dragDropIconArea.classList.add(...size.icon);
         }
-        
+
         function addPosterText() {
             const posterTextarea = document.getElementById('posterTextarea');
             const text = posterTextarea.value;
@@ -888,7 +896,7 @@
             toggleTextEditor();
             posterTextarea.value = '';
         }
-        
+
         function openModal(src) {
             const modalImage = document.getElementById("modalImage");
             modalImage.src = src;
@@ -921,7 +929,7 @@
             floatingButtonsContainer.classList.remove("hidden");
             selectSize('size-medium');
         }
-        
+
         function changeProfileBackground() {
             currentBgIndex = (currentBgIndex + 1) % profileBackgrounds.length;
             const imageUrl = profileBackgrounds[currentBgIndex];
@@ -930,30 +938,30 @@
             profileOverlay.style.backgroundPosition = 'center';
             profileOverlay.style.backgroundRepeat = 'no-repeat';
         }
-        
+
         function closeModal() {
             document.getElementById("modal").classList.add("hidden");
             floatingButtonsContainer.classList.add("hidden");
         }
-        
+
         function showDownloadOptions() {
             document.getElementById('qualityPopup').classList.remove('hidden');
         }
-        
+
         function closeQualityPopup() {
             document.getElementById('qualityPopup').classList.add('hidden');
         }
-        
+
         function showDownloadProgress() {
             document.getElementById('downloadPopup').classList.remove('hidden');
             document.getElementById('loadingState').classList.remove('hidden');
-            document.getElementById('downloadComplete').classList.remove('hidden');
+            document.getElementById('downloadComplete').classList.add('hidden');
         }
-        
+
         function closeDownloadPopup() {
             document.getElementById('downloadPopup').classList.add('hidden');
         }
-        
+
         async function getPreloadedCanvas(element, options) {
             const clonedElement = element.cloneNode(true);
             clonedElement.style.position = 'absolute';
@@ -963,7 +971,7 @@
             document.body.removeChild(clonedElement);
             return canvas;
         }
-        
+
         async function downloadSD() {
             closeQualityPopup();
             showDownloadProgress();
@@ -986,7 +994,7 @@
                 console.error('SD Download error:', error);
             }
         }
-        
+
         async function downloadHD() {
             closeQualityPopup();
             showDownloadProgress();
@@ -1009,7 +1017,7 @@
                 console.error('HD Download error:', error);
             }
         }
-        
+
         async function shareImage() {
             try {
                 const captureArea = document.querySelector("#captureArea");
@@ -1036,7 +1044,7 @@
                 console.error('Share error:', error);
             }
         }
-        
+
         function showMessage(message) {
             const messageBox = document.createElement('div');
             messageBox.innerText = message;
@@ -1046,9 +1054,9 @@
                 document.body.removeChild(messageBox);
             }, 3000);
         }
-        
+
         let currentEditTextElement = null;
-        
+
         function editProfileText(elementId) {
             const textEditPanel = document.getElementById('textEditPanel');
             const textEditInput = document.getElementById('textEditInput');
@@ -1057,7 +1065,7 @@
             textEditPanel.classList.remove('hidden');
             textEditInput.focus();
         }
-        
+
         function saveProfileText() {
             if (!currentEditTextElement) return;
             const newText = document.getElementById('textEditInput').value;
@@ -1065,17 +1073,17 @@
             document.getElementById('textEditPanel').classList.add('hidden');
             currentEditTextElement = null;
         }
-        
+
         function toggleChangePhotoPopup() {
             const changePhotoPopup = document.getElementById('changePhotoPopup');
             changePhotoPopup.classList.toggle('hidden');
         }
-        
+
         function toggleThemeList() {
             const themeListPanel = document.getElementById('themeListPanel');
             themeListPanel.classList.toggle('hidden');
         }
-        
+
         function selectTheme(theme) {
             const profileOverlay = document.getElementById('profileOverlay');
             const watermark = document.getElementById('watermark');
@@ -1089,7 +1097,7 @@
             }
             toggleThemeList();
         }
-        
+
         const newPosterInput = document.getElementById('newPosterInput');
         newPosterInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -1103,7 +1111,7 @@
                 reader.readAsDataURL(file);
             }
         });
-        
+
         function setWatermark() {
             const watermarkTextElement = document.getElementById('watermarkText');
             if (watermarkTextElement) {
