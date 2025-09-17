@@ -261,11 +261,16 @@
             padding: 1.5rem;
             background-color: #fff;
         }
-
         #image-details-section .profile-and-buttons {
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+        #image-details-section .buttons-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
         }
     </style>
 </head>
@@ -362,8 +367,8 @@
                     </div>
                 </div>
 
-                <div id="image-details-section">
-                    <div class="profile-and-buttons">
+                <div id="image-details-section" class="bg-white p-4">
+                    <div class="flex justify-between items-center">
                         <div class="flex items-center space-x-2">
                             <img id="modalProfilePic" class="w-10 h-10 rounded-full border-2 border-white shadow-md">
                             <div class="flex flex-col">
@@ -371,13 +376,15 @@
                                 <span id="modalProfileExtra" class="text-sm text-gray-600"></span>
                             </div>
                         </div>
-                        
-                        <div class="flex items-center space-x-2">
-                            <button onclick="toggleFontList()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full font-bold transition">Aa</button>
-                            <button onclick="changeProfileShape()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full font-bold transition">🔲</button>
-                            <button onclick="toggleSizeList()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full font-bold transition">🔍</button>
-                            <button onclick="applyFilter()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full font-bold transition">✨</button>
-                        </div>
+                    </div>
+                </div>
+                
+                <div id="image-options-section" class="bg-white p-4">
+                    <div class="flex justify-center flex-wrap gap-2">
+                        <button onclick="toggleFontList()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full font-bold transition">Aa</button>
+                        <button onclick="changeProfileShape()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full font-bold transition">🔲</button>
+                        <button onclick="toggleSizeList()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full font-bold transition">🔍</button>
+                        <button onclick="applyFilter()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full font-bold transition">✨</button>
                     </div>
                 </div>
 
@@ -495,6 +502,9 @@
         let loadedImageCount = 0;
         let allImages = [];
         const loadMoreBtn = document.getElementById('loadMoreBtn');
+        const modalProfilePic = document.getElementById('modalProfilePic');
+        const modalProfileName = document.getElementById('modalProfileName');
+        const modalProfileExtra = document.getElementById('modalProfileExtra');
 
         async function compressImageForGallery(src, maxWidth, quality) {
             return new Promise((resolve, reject) => {
@@ -649,11 +659,10 @@
         function openModal(src) {
             const selectedImage = document.getElementById("modalImage");
             selectedImage.src = src;
-            document.getElementById("modalProfilePic").src = user.pic;
-            document.getElementById("modalProfileName").innerText = user.name;
-            document.getElementById("modalProfileExtra").innerText = user.extra;
+            modalProfilePic.src = user.pic;
+            modalProfileName.innerText = user.name;
+            modalProfileExtra.innerText = user.extra;
             
-            // Clear and load related images
             relatedImagesGallery.innerHTML = '';
             const relatedImages = allImages.filter(url => url !== src);
             const shuffledRelated = relatedImages.sort(() => 0.5 - Math.random());
@@ -667,7 +676,7 @@
                 img.alt = "Related Image";
                 img.style.opacity = 0;
                 img.style.transition = 'opacity 0.5s ease-in-out';
-                container.onclick = () => openModal(relatedSrc); // Recursively open new image
+                container.onclick = () => openModal(relatedSrc);
                 container.appendChild(img);
                 relatedImagesGallery.appendChild(container);
                 lazyLoadObserver.observe(img);
@@ -675,7 +684,7 @@
 
             modal.classList.remove("hidden");
             document.body.style.overflow = 'hidden';
-            modal.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll modal to top
+            modal.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function closeModal() {
@@ -810,16 +819,37 @@
             });
         });
 
-        // The following functions are no longer used in the new layout
-        function applyFilter() {}
-        function toggleFontList() {}
-        function selectFont() {}
+        // The following functions are now being re-implemented or adapted
+        function applyFilter() {
+            const selectedImage = document.getElementById('modalImage');
+            if (currentFilterIndex >= 0 && filters[currentFilterIndex] !== '') {
+                selectedImage.classList.remove(filters[currentFilterIndex]);
+            }
+            currentFilterIndex = (currentFilterIndex + 1) % filters.length;
+            if (currentFilterIndex >= 0 && filters[currentFilterIndex] !== '') {
+                selectedImage.classList.add(filters[currentFilterIndex]);
+            }
+        }
+        
+        function changeProfileShape() {
+            const profilePic = document.getElementById('modalProfilePic');
+            profilePic.classList.remove(...profileShapes);
+            currentShapeIndex = (currentShapeIndex + 1) % profileShapes.length;
+            profilePic.classList.add(profileShapes[currentShapeIndex]);
+        }
+        
+        // These functions need new UI elements, so their implementation would require adding a new popup
+        function toggleFontList() {
+            alert('Font list functionality needs a new popup to select fonts.');
+        }
+        function toggleSizeList() {
+            alert('Size list functionality needs a new popup to select profile image size.');
+        }
+        
+        // These functions are not used in this specific Pinterest layout but are good to keep
         function toggleTextEditor() {}
-        function toggleSizeList() {}
-        function selectSize() {}
         function addPosterText() {}
         function changeProfileIcon() {}
-        function changeProfileShape() {}
     </script>
 </body>
 </html>
