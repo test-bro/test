@@ -567,7 +567,7 @@
                         } catch (error) {
                             console.error(`Failed to compress or load image: ${src}`, error);
                             img.src = '/test/img/ad-banner.webp';
-                            img.style.objectFit = 'contain';
+                            img.style.object-fit = 'contain';
                             img.style.opacity = 1;
                         }
                     }
@@ -599,7 +599,7 @@
                 img.onerror = function() {
                     console.log(`Image failed to load: ${this.src}. Displaying ad banner.`);
                     this.src = '/test/img/ad-banner.webp';
-                    this.style.object-fit = 'contain';
+                    this.style.objectFit = 'contain';
                     this.parentNode.onclick = null;
                     this.style.opacity = 1;
                 };
@@ -947,7 +947,7 @@
         function showDownloadProgress() {
             document.getElementById('downloadPopup').classList.remove('hidden');
             document.getElementById('loadingState').classList.remove('hidden');
-            document.getElementById('downloadComplete').classList.add('hidden');
+            document.getElementById('downloadComplete').classList.remove('hidden');
         }
         
         function closeDownloadPopup() {
