@@ -1006,8 +1006,14 @@
             document.getElementById("modal").classList.add("hidden");
             floatingButtonsContainer.classList.add("hidden");
             
-            // Show the bottom navigation and back to top button when the modal closes
-            document.getElementById('bottom-nav').style.display = 'flex';
+            // Show the bottom navigation and back to top button
+            const bottomNav = document.getElementById('bottom-nav');
+            bottomNav.style.display = 'flex';
+            
+            // This ensures the buttons are spaced correctly
+            bottomNav.querySelector('div').classList.add('flex-row', 'justify-around');
+            
+            // Show the back to top button
             document.getElementById('backToTopBtn').style.display = 'flex';
         }
 
